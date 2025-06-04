@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard do Paciente</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Estilos personalizados -->
+    <link href="css/estilos.css" rel="stylesheet">
+    <script src="config.js"></script>
+    <style>
+  .avaliacao i {
+    font-size: 1.5rem;
+    color: #ccc;
+    transition: color 0.2s ease-in-out;
+  }
+
+  .avaliacao i.bi-star-fill {
+    color: #ffc107; /* amarelo */
+  }
+
+  .avaliacao i:hover,
+  .avaliacao i:hover ~ i {
+    color: #ffc107;
+  }
+
+  .avaliacao i.ativa {
+    color: #ffc107;
+  }
+</style>
+    
+
+    
+</head>
+
+<body class="bg-light">
+    <!-- Navbar moderna -->
+    <nav class="navbar navbar-expand-lg bg-primary navbar-dark mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="dashboard-paciente.html">
+                <i class="bi bi-heart-pulse-fill me-2"></i> Clínicas Integradas
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuPaciente">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="menuPaciente">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="dashboard-paciente.html"><i
+                                class="bi bi-house-door-fill me-1"></i> Início</a></li>
+                    <li class="nav-item"><a class="nav-link" href="agendar.html"><i
+                                class="bi bi-calendar-plus-fill me-1 text-warning"></i> Agendar</a></li>
+                    <!-- <li class="nav-item"><a class="nav-link" href="minha-agenda.html"><i
+                                class="bi bi-list-check me-1"></i> Minhas Consultas</a></li> -->
+                    <li class="nav-item"><a class="nav-link" href="dados-pessoais.html"><i
+                                class="bi bi-person-fill-gear me-1 text-info"></i> Meus Dados</a></li>
+                    <li class="nav-item"><a class="nav-link" href="home.html" onclick="localStorage.clear()"><i
+                                class="bi bi-box-arrow-right me-1"></i> Sair</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="text-center mb-4">
+            <h2 id="boasVindas">Olá, paciente!</h2>
+            <p class="text-muted">Bem-vindo à sua área pessoal na Clínica</p>
+        </div>
+
+        <!-- Consultas futuras -->
+        <div>
+            <h4 class="mb-3">📌 Próximas Consultas</h4>
+            <div id="proximosAgendamentos" class="row g-3"></div>
+        </div>
+    </div>
+    
+	<!-- Avaliar Consultas Realizadas -->
+	<div class="container py-5">
+	    <h4 class="mb-3">⭐ Avaliar Consultas Realizadas</h4>
+	    <div id="avaliacoesPendentes" class="row g-3"></div>
+	</div>
+	
+    
+
+    <script>
+    const nome = localStorage.getItem("nome") || "Paciente";
+    document.getElementById("boasVindas").textContent = `Olá, ${nome}!`;
+    carregarAvaliacoesPendentes();
+
+
+    // 🎯 Função para formatar o status com emojis
+    function formatarStatus(status) {
+        switch (status) {
+            case "AGENDADO": return "🔵 Agendada";
+            case "CONFIRMADO": return "🟢 Confirmada";
+            case "CANCELADO": return "🔴 Cancelada";
+            case "REALIZADO": return "✅ Realizada";
+            case "FALTOU": return "⚠️ Não compareceu";
+            default: return status || "⏳ Aguardando confirmação";
+        }
+    }
+
+    // 🔄 Buscar agendamentos
+    fetch(baseUrl + `/agendamentos/paciente/${encodeURIComponent(nome)}`)
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById("proximosAgendamentos");
+            container.innerHTML = "";
+
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+
+            const agendamentosFuturos = data.filter(item => {
+                const dataConsulta = new Date(item.dataHora);
+                dataConsulta.setHours(0, 0, 0, 0);
+                return dataConsulta >= hoje;
+            });
+
+            if (agendamentosFuturos.length === 0) {
+                container.innerHTML = `<div class="text-muted">Nenhuma consulta marcada no momento.</div>`;
+                return;
+            }
+
+            agendamentosFuturos.forEach(item => {
+                const data = new Date(item.dataHora);
+                const dataFormatada = data.toLocaleDateString('pt-BR') + " " + data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+                const col = document.createElement("div");
+                col.className = "col-md-6";
+                col.innerHTML = `
+                    <div class="consulta-card">
+                        <h5>${item.especialidade}</h5>
+                        <p><strong>Aluno:</strong> ${item.aluno}</p>
+                        <p><strong>Data:</strong> ${dataFormatada}</p>
+                        <p><strong>Status:</strong> ${formatarStatus(item.status)}</p>
+                        <div class="d-flex gap-2">
+                        <button class="btn-confirmar" onclick="confirmarAgendamento(${item.id})">Confirmar</button>
+                            <button class="btn-cancelar" onclick="cancelarAgendamento(${item.id})">Cancelar</button>
+                        </div>
+                    </div>`;
+                container.appendChild(col);
+            });
+        })
+        .catch(error => {
+            document.getElementById("proximosAgendamentos").innerHTML = `
+                <div class="alert alert-danger" role="alert">
+                    Erro ao carregar as consultas.
+                </div>`;
+            console.error("Erro ao buscar agendamentos:", error);
+        });
+    
+ // carregar consultas realizadas.
+    async function carregarAvaliacoesPendentes() {
+        try {
+            const response = await fetch(baseUrl + `/agendamentos/paciente/${encodeURIComponent(nome)}`);
+            const data = await response.json();
+            const container = document.getElementById("avaliacoesPendentes");
+            container.innerHTML = "";
+
+            const agora = new Date();
+            const consultasRealizadas = data.filter(item => {
+                const dataConsulta = new Date(item.dataHora);
+                return dataConsulta < agora && !item.avaliacao;
+            });
+
+            if (consultasRealizadas.length === 0) {
+                container.innerHTML = `<div class="text-muted">Nenhuma consulta a ser avaliada.</div>`;
+                return;
+            }
+
+            consultasRealizadas.forEach(item => {
+                const data = new Date(item.dataHora);
+                const dataFormatada = data.toLocaleDateString('pt-BR') + " " + data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+                const col = document.createElement("div");
+                col.className = "col-md-6";
+                col.innerHTML = `
+                    <div class="consulta-card">
+                        <h5>${item.especialidade}</h5>
+                        <p><strong>Aluno:</strong> ${item.aluno}</p>
+                        <p><strong>Data:</strong> ${dataFormatada}</p>
+                        <div class="avaliacao mt-2" data-id="${item.id}">
+                            ${[1, 2, 3, 4, 5].map(n => `<i class="bi bi-star" data-valor="${n}" style="cursor:pointer;"></i>`).join('')}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(col);
+
+                // 🎯 Adiciona eventos às estrelas após renderizar
+                const estrelas = col.querySelectorAll(".avaliacao i");
+
+                estrelas.forEach(estrela => {
+                    estrela.addEventListener("mouseenter", function () {
+                        const valor = parseInt(this.getAttribute("data-valor"));
+                        estrelas.forEach(e => {
+                            const eValor = parseInt(e.getAttribute("data-valor"));
+                            e.classList.remove("bi-star-fill", "bi-star");
+                            if (eValor <= valor) {
+                                e.classList.add("bi-star-fill");
+                            } else {
+                                e.classList.add("bi-star");
+                            }
+                        });
+                    });
+
+                    estrela.addEventListener("mouseleave", function () {
+                        estrelas.forEach(e => {
+                            e.classList.remove("bi-star-fill");
+                            e.classList.add("bi-star");
+                        });
+                    });
+
+                    estrela.addEventListener("click", async function () {
+                        const valor = this.getAttribute("data-valor");
+                        const id = this.parentElement.getAttribute("data-id");
+
+                        const response = await fetch(`${baseUrl}/agendamentos/${id}/avaliar`, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ avaliacao: parseInt(valor) })
+                        });
+
+                        if (response.ok) {
+                            alert("Avaliação registrada com sucesso!");
+                            carregarAvaliacoesPendentes();
+                        } else {
+                            alert("Erro ao registrar avaliação.");
+                        }
+                    });
+                });
+            });
+        } catch (error) {
+            console.error("Erro ao carregar avaliações pendentes:", error);
+            document.getElementById("avaliacoesPendentes").innerHTML = `
+                <div class="alert alert-danger">Erro ao carregar avaliações.</div>
+            `;
+        }
+    }
+
+
+
+          
+    // ❌ Cancelar agendamento
+    async function cancelarAgendamento(id) {
+    if (confirm("Deseja realmente cancelar esta consulta?")) {
+        try {
+            const response = await fetch(baseUrl + `/agendamentos/${id}/cancelar`, {
+                method: "DELETE"
+            });
+
+            if (response.ok) {
+                alert("Consulta cancelada com sucesso!");
+                location.reload();
+            } else {
+                alert("Erro ao cancelar a consulta.");
+            }
+        } catch (error) {
+            alert("Erro de conexão.");
+            console.error(error);
+        }
+    }
+}
+
+    
+    // confirmar agendamento
+    async function confirmarAgendamento(id) {
+    try {
+        const response = await fetch(baseUrl +`/agendamentos/${id}/confirmar`, {
+            method: "PUT"
+        });
+
+        if (response.ok) {
+            alert("Consulta confirmada com sucesso!");
+            location.reload(); // Recarrega a lista com o status atualizado
+        } else {
+            alert("Erro ao confirmar a consulta.");
+        }
+    } catch (error) {
+        alert("Erro de conexão.");
+        console.error(error);
+    }
+}
+    
+    window.onload = () => {
+        carregarAvaliacoesPendentes();
+    };
+
+
+</script>
+    
+    
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

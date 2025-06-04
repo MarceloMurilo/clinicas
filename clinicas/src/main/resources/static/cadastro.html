@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro - Clínicas Integradas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="config.js"></script>
+</head>
+
+<body class="bg-light">
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="card shadow p-4 w-100" style="max-width: 450px;">
+            <h3 class="text-center mb-4">Cadastro de Paciente</h3>
+            <form id="cadastroForm">
+                <div class="mb-3">
+                    <label for="nome" class="form-label">Nome completo</label>
+                    <input type="text" class="form-control" id="nome" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">E-mail</label>
+                    <input type="email" class="form-control" id="email" required>
+                </div>
+                <div class="mb-3">
+                    <label for="celular" class="form-label">Celular (WhatsApp)</label>
+                    <input type="text" class="form-control" id="celular" placeholder="(99) 99999-9999" required>
+                </div>
+                <div class="mb-3">
+                    <label for="senha" class="form-label">Senha</label>
+                    <input type="password" class="form-control" id="senha" required>
+                </div>
+                <button type="submit" class="btn btn-success w-100">Cadastrar</button>
+            </form>
+            <div class="text-center mt-3">
+                <a href="login.html">Já tem cadastro? Entrar</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Máscara com JavaScript puro -->
+    <script>
+        const celularInput = document.getElementById('celular');
+        celularInput.addEventListener('input', function (e) {
+            let value = e.target.value.replace(/\D/g, "");
+            if (value.length > 11) value = value.slice(0, 11);
+
+            if (value.length >= 2 && value.length <= 6) {
+                value = `(${value.slice(0, 2)}) ${value.slice(2)}`;
+            } else if (value.length > 6) {
+                value = `(${value.slice(0, 2)}) ${value.slice(2, 7)}-${value.slice(7)}`;
+            }
+
+            e.target.value = value;
+        });
+    </script>
+
+    <!-- Script principal -->
+    <script>
+        document.getElementById('cadastroForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const nome = document.getElementById('nome').value;
+            const email = document.getElementById('email').value;
+            const celular = document.getElementById('celular').value;
+            const senha = document.getElementById('senha').value;
+            const papel = "PACIENTE";
+
+            try {
+                const emailExiste = await fetch(baseUrl +`/usuarios/existe-email?email=${encodeURIComponent(email)}`);
+                const jaExiste = await emailExiste.json();
+
+                if (jaExiste) {
+                    alert("Este e-mail já está cadastrado. Por favor, utilize outro.");
+                    return;
+                }
+
+                const response = await fetch(baseUrl +'/usuarios', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, email, senha, celular, papel, ativo: true })
+                });
+
+                if (response.ok) {
+                    alert("Paciente cadastrado com sucesso!");
+                    window.location.href = "login.html";
+                } else {
+                    alert("Erro ao cadastrar. Verifique os dados.");
+                }
+            } catch (error) {
+                alert("Erro ao tentar cadastrar. Verifique a conexão com o servidor.");
+                console.error(error);
+            }
+        });
+    </script>
+
+</body>
+
+</html>

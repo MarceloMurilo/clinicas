@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configurar Salas</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="config.js"></script>
+</head>
+<body class="bg-light">
+  <div class="container py-5">
+    <!-- Título + Sair -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="text-primary">Configurar Salas por Especialidade.</h2>
+      <a href="painel-admin.html" class="btn btn-outline-secondary">Voltar</a>
+	</div>
+    <form id="formSalas" class="card p-4 shadow-sm">
+      <div class="mb-3">
+        <label for="areaClinica" class="form-label">Área Clínica</label>
+        <select id="areaClinica" class="form-select" required>
+          <option value="">Selecione...</option>
+          <option value="Psicologia">Psicologia</option>
+          <option value="Fisioterapia">Fisioterapia</option>
+          <option value="Nutrição">Nutrição</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Selecione as Salas Disponíveis:</label>
+        <div id="opcoesSalas" class="d-flex flex-wrap gap-3">
+          <!-- As opções de salas vão de Sala 1 a Sala 6 -->
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="Sala 1" id="sala1">
+            <label class="form-check-label" for="sala1">Sala 1</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="Sala 2" id="sala2">
+            <label class="form-check-label" for="sala2">Sala 2</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="Sala 3" id="sala3">
+            <label class="form-check-label" for="sala3">Sala 3</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="Sala 4" id="sala4">
+            <label class="form-check-label" for="sala4">Sala 4</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="Sala 5" id="sala5">
+            <label class="form-check-label" for="sala5">Sala 5</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="Sala 6" id="sala6">
+            <label class="form-check-label" for="sala6">Sala 6</label>
+          </div>
+        </div>
+      </div>
+
+      <p class="fw-bold text-success">Salas Selecionadas: <span id="contadorSalas">0</span></p>
+
+      <button type="submit" class="btn btn-success w-100">Salvar Configuração</button>
+    </form>
+
+    <div id="mensagem" class="mt-3"></div>
+
+    <hr class="my-5" />
+
+    <h4 class="mb-3">Salas Configuradas</h4>
+    <ul id="listaSalas" class="list-group"></ul>
+  </div>
+
+  <script>
+    async function carregarSalas() {
+      const resp = await fetch(baseUrl + "/salas");
+      const salas = await resp.json();
+      const lista = document.getElementById("listaSalas");
+      lista.innerHTML = "";
+      salas.forEach(s => {
+        const li = document.createElement("li");
+        li.className = "list-group-item d-flex justify-content-between align-items-center";
+        li.innerHTML = `${s.areaClinica} - ${s.quantidade} sala(s) (${s.salas.join(', ')})`;
+        lista.appendChild(li);
+      });
+    }
+
+    function atualizarContador() {
+      const selecionadas = document.querySelectorAll("#opcoesSalas input[type='checkbox']:checked");
+      document.getElementById("contadorSalas").textContent = selecionadas.length;
+    }
+
+    document.querySelectorAll("#opcoesSalas input[type='checkbox']").forEach(cb => {
+      cb.addEventListener("change", atualizarContador);
+    });
+
+    document.getElementById("formSalas").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const areaClinica = document.getElementById("areaClinica").value;
+      const selecionadas = Array.from(document.querySelectorAll("#opcoesSalas input[type='checkbox']:checked")).map(cb => cb.value);
+      const quantidade = selecionadas.length;
+
+      const resp = await fetch(baseUrl + "/salas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ areaClinica, quantidade, salas: selecionadas })
+      });
+
+      const msg = document.getElementById("mensagem");
+      if (resp.ok) {
+        msg.innerHTML = `<div class="alert alert-success">Salas configuradas com sucesso!</div>`;
+        carregarSalas();
+      } else {
+        msg.innerHTML = `<div class="alert alert-danger">Erro ao salvar configuração.</div>`;
+      }
+    });
+
+    carregarSalas();
+  </script>
+</body>
+</html>
+ 

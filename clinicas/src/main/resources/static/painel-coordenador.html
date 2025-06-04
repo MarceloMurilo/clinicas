@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Painel do Coordenador</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <style>
+    .menu-card {
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .menu-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="bg-light">
+  <div class="container py-4">
+    <!-- Título + Sair -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="text-primary"><i class="bi bi-bar-chart-line-fill"></i> Painel do Coordenador</h2>
+      <a href="home.html" class="btn btn-outline-secondary">Sair</a>
+    </div>
+
+    <!-- Menu de Ações -->
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+      <div class="col">
+        <a href="dashboard-analitico.html" class="text-decoration-none text-dark">
+          <div class="card menu-card shadow-sm h-100">
+            <div class="card-body text-center">
+              <h1>📊</h1>
+              <h5 class="card-title">Dashboard Analítico</h5>
+              <p class="card-text">Visualize indicadores de desempenho clínico e acadêmico.</p>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <div class="col">
+        <a href="relatorios.html" class="text-decoration-none text-dark">
+          <div class="card menu-card shadow-sm h-100">
+            <div class="card-body text-center">
+              <h1>📑</h1>
+              <h5 class="card-title">Relatórios de Comparecimento</h5>
+              <p class="card-text">Acompanhe a presença dos alunos e pacientes.</p>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <div class="col">
+        <a href="configuracoes-clinicas.html" class="text-decoration-none text-dark">
+          <div class="card menu-card shadow-sm h-100">
+            <div class="card-body text-center">
+              <h1>📅</h1>
+              <h5 class="card-title">Configuração da Agenda</h5>
+              <p class="card-text">Configurar o horário de atendimento e a dispobilidade de lalas e horários.</p>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <div class="col">
+        <a href="financeiro.html" class="text-decoration-none text-dark">
+          <div class="card menu-card shadow-sm h-100">
+            <div class="card-body text-center">
+              <h1>💰</h1>
+              <h5 class="card-title">Financeiro</h5>
+              <p class="card-text">Visualize a quantidade de atendimentos gratuitos e pagos.</p>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <div class="col">
+        <a href="disponibilidade.html" class="text-decoration-none text-dark">
+          <div class="card menu-card shadow-sm h-100">
+            <div class="card-body text-center">
+              <h1>🧑‍⚕️</h1>
+              <h5 class="card-title">Disponibilidade de Profissionais</h5>
+              <p class="card-text">Gerencie e acompanhe a agenda dos profissionais.</p>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col">
+  <a href="config-salas.html" class="text-decoration-none text-dark">
+    <div class="card menu-card shadow-sm h-100">
+      <div class="card-body text-center">
+        <h1>📋</h1>
+        <h5 class="card-title">🏥 Configurar Salas por Especialidade</h5>
+        <p class="card-text">Informar a quantidade de salas disponíveis por especialidade.</p>
+      </div>
+    </div>
+  </a>
+</div>
+      
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agendar Consulta - Clínicas Integradas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .horario-card {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .horario-card:hover {
+            background-color: #f0f0f0;
+        }
+
+        .horario-card.selecionado {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+        }
+    </style>
+    <script src="config.js"></script>
+</head>
+
+<body class="bg-light">
+
+    <!-- Navbar moderna -->
+    <nav class="navbar navbar-expand-lg bg-primary navbar-dark mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="dashboard-paciente.html">
+                <i class="bi bi-heart-pulse-fill me-2"></i> Clínicas Integradas
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuPaciente">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="menuPaciente">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="dashboard-paciente.html"><i
+                                class="bi bi-house-door-fill me-1"></i> Início</a></li>
+                    <li class="nav-item"><a class="nav-link" href="agendar.html"><i
+                                class="bi bi-calendar-plus-fill me-1 text-warning"></i> Agendar</a></li>
+                   	<!-- <li class="nav-item"><a class="nav-link" href="minha-agenda.html"><i
+                                class="bi bi-list-check me-1"></i> Minhas Consultas</a></li> -->
+                    <li class="nav-item"><a class="nav-link" href="dados-pessoais.html"><i
+                                class="bi bi-person-fill-gear me-1 text-info"></i> Meus Dados</a></li>
+                    <li class="nav-item"><a class="nav-link" href="home.html" onclick="localStorage.clear()"><i
+                                class="bi bi-box-arrow-right me-1"></i> Sair</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h3 class="text-primary fw-bold mb-3">➕ Agendar Nova Consulta</h3>
+
+        <div class="card shadow p-4">
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-end gap-2">
+                        <div class="flex-grow-1">
+                            <label for="especialidade" class="form-label text-secondary">Especialidade</label>
+                            <select class="form-select" id="especialidade" onchange="carregarAlunosPorEspecialidade()">
+                                <option value="">Selecionar</option>
+                                <option value="Fisioterapia">Fisioterapia</option>
+                                <option value="Nutrição">Nutrição</option>
+                                <option value="Psicologia">Psicologia</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-outline-primary" onclick="mostrarProfissionais()" type="button">
+                            <i class="bi bi-people-fill me-1"></i> Ver Profissionais
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label for="aluno" class="form-label text-secondary">Aluno</label>
+                    <select class="form-select" id="aluno">
+                        <option value="">Selecionar</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="mes" class="form-label text-secondary">Mês</label>
+                    <select class="form-select" id="mes">
+                        <option value="">Selecionar</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="ano" class="form-label text-secondary">Ano</label>
+                    <select class="form-select" id="ano">
+                        <option value="">Selecionar</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="diasDisponiveis" class="mb-4"></div>
+            <div id="horariosDisponiveis" class="row g-3 mb-3"></div>
+            <div class="text-end">
+                <button id="btnAgendar" class="btn btn-success" disabled>Agendar Consulta</button>
+            </div>
+            <button type="button" class="btn btn-outline-secondary w-100 mt-2" onclick="limparConsulta()">
+                🔄 <span id="textoNovaConsulta">Nova Consulta</span>
+            </button>
+
+        </div>
+    </div>
+    <script>
+        async function carregarAlunosPorEspecialidade() {
+            const especialidade = document.getElementById("especialidade").value;
+            const alunoSelect = document.getElementById("aluno");
+
+            if (!especialidade) {
+                alunoSelect.innerHTML = '<option value="">Selecionar</option>';
+                return;
+            }
+
+            try {
+                const response = await fetch(baseUrl + "/disponibilidades");
+                const disponibilidades = await response.json();
+
+                // Filtra alunos únicos pela especialidade
+                const nomesUnicos = [...new Set(
+                    disponibilidades
+                        .filter(d => d.especialidade === especialidade && d.aluno)
+                        .map(d => d.aluno)
+                )];
+
+                // Preenche o select
+                alunoSelect.innerHTML = '<option value="">Selecionar</option>';
+                nomesUnicos.forEach(nome => {
+                    const option = document.createElement("option");
+                    option.value = nome;
+                    option.textContent = nome;
+                    alunoSelect.appendChild(option);
+                });
+
+            } catch (error) {
+                console.error("Erro ao carregar alunos:", error);
+            }
+        }
+    </script>
+    <script>
+        // Função para exibir o modal de profissionais
+        async function mostrarProfissionais() {
+            const especialidade = document.getElementById('especialidade').value;
+            if (!especialidade) {
+                alert('Por favor, selecione uma especialidade primeiro.');
+                return;
+            }
+
+            try {
+                // Simulando busca de profissionais (substitua pela sua chamada API real)
+                const response = await fetch(`${baseUrl}/disponibilidades?especialidade=${encodeURIComponent(especialidade)}`);
+                const disponibilidades = await response.json();
+                
+                // Agrupar por profissional
+                const profissionaisMap = new Map();
+                
+                disponibilidades.forEach(disp => {
+                    if (!disp.aluno) return;
+                    
+                    if (!profissionaisMap.has(disp.aluno)) {
+                        profissionaisMap.set(disp.aluno, {
+                            nome: disp.aluno,
+                            especialidade: disp.especialidade || especialidade,
+                            horarios: []
+                        });
+                    }
+                    
+                    // Adiciona horário único
+                    const horario = new Date(disp.dataHora).toLocaleString('pt-BR', {
+                        weekday: 'short',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    if (!profissionaisMap.get(disp.aluno).horarios.includes(horario)) {
+                        profissionaisMap.get(disp.aluno).horarios.push(horario);
+                    }
+                });
+                
+                // Preencher tabela
+                const tbody = document.getElementById('tabelaProfissionais');
+                tbody.innerHTML = '';
+                
+                if (profissionaisMap.size === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center">Nenhum profissional encontrado</td></tr>';
+                    return;
+                }
+                
+                Array.from(profissionaisMap.values()).forEach(prof => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${prof.nome}</td>
+                        <td>${prof.especialidade}</td>
+                        <td>${prof.horarios.length} horários disponíveis</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" onclick="selecionarProfissional('${prof.nome}')">
+                                Selecionar
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                
+                // Exibir o modal
+                const modal = new bootstrap.Modal(document.getElementById('modalProfissionais'));
+                modal.show();
+                
+            } catch (error) {
+                console.error('Erro ao carregar profissionais:', error);
+                alert('Erro ao carregar profissionais. Tente novamente.');
+            }
+        }
+        
+        // Função para selecionar um profissional
+        function selecionarProfissional(nome) {
+            document.getElementById('aluno').value = nome;
+            document.querySelector('[data-bs-dismiss="modal"]').click(); // Fecha o modal
+            // Dispara o evento de mudança para carregar os horários
+            document.getElementById('aluno').dispatchEvent(new Event('change'));
+        }
+    </script>
+    <script>
+        const paciente = localStorage.getItem("nome") || "Paciente";
+        let horarios = [];
+        let horarioSelecionado = null;
+
+        // Preenche mês e ano
+        const mesSelect = document.getElementById("mes");
+        const anoSelect = document.getElementById("ano");
+        const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+        const anoAtual = new Date().getFullYear();
+
+        meses.forEach((mes, i) => mesSelect.innerHTML += `<option value="${i + 1}">${mes}</option>`);
+        for (let a = anoAtual; a <= anoAtual + 1; a++) anoSelect.innerHTML += `<option value="${a}">${a}</option>`;
+
+        // Eventos para carregar dias ao mudar mês/ano
+        mesSelect.addEventListener("change", carregarDias);
+        anoSelect.addEventListener("change", carregarDias);
+
+        // 🔁 Botão "Nova Consulta"
+        function limparConsulta() {
+            document.getElementById("especialidade").value = "";
+            document.getElementById("aluno").value = "";
+            document.getElementById("mes").value = "";
+            document.getElementById("ano").value = "";
+
+            document.getElementById("diasDisponiveis").innerHTML = "";
+            document.getElementById("horariosDisponiveis").innerHTML = "";
+
+            horarioSelecionado = null;
+            document.getElementById("btnAgendar").disabled = true;
+
+            const texto = document.getElementById("textoNovaConsulta");
+            texto.textContent = "Limpando...";
+            setTimeout(() => {
+                texto.textContent = "Nova Consulta";
+            }, 1000);
+        }
+
+        // 🎯 Busca dias disponíveis filtrados
+        	async function carregarDias() {
+            const especialidade = document.getElementById("especialidade").value;
+            const aluno = document.getElementById("aluno").value;
+            const mes = mesSelect.value;
+            const ano = anoSelect.value;
+
+            if (!especialidade || !aluno || !mes || !ano) return;
+
+            const response = await fetch(baseUrl +"/disponibilidades/filtrar?especialidade=" + especialidade + "&aluno=" + aluno);
+            horarios = await response.json();
+
+            const diasContainer = document.getElementById("diasDisponiveis");
+            diasContainer.innerHTML = "";
+
+            const horariosFiltrados = horarios.filter(h => {
+                const data = new Date(h.dataHora);
+                return data.getMonth() + 1 == mes && data.getFullYear() == ano;
+            });
+
+            if (horariosFiltrados.length === 0) {
+                const mensagem = document.createElement("div");
+                mensagem.className = "alert alert-warning d-flex align-items-center";
+                mensagem.innerHTML = `
+                    <i class="bi bi-exclamation-triangle-fill me-2 fs-5 text-warning"></i>
+                    <div>
+                        Não há <strong>consulta disponível</strong> neste mês para <strong>${aluno}</strong>.
+                    </div>
+                `;
+                diasContainer.appendChild(mensagem);
+                document.getElementById("horariosDisponiveis").innerHTML = "";
+                return;
+            }
+
+            diasContainer.innerHTML = `<h5 class="fw-bold mb-2 text-primary">📆 Dias Disponíveis:</h5>`;
+            const diasUnicos = [...new Set(horariosFiltrados.map(h => h.dataHora.split("T")[0]))];
+
+            diasUnicos.forEach(dia => {
+            	const partes = dia.split("-"); // ["2025", "04", "23"]
+            	const diaFormatado = `${partes[2]}/${partes[1]}/${partes[0]}`;
+
+                const btn = document.createElement("button");
+                btn.className = "btn btn-outline-primary me-2 mb-2";
+                btn.textContent = diaFormatado;
+                btn.onclick = () => carregarHorarios(dia);
+                diasContainer.appendChild(btn);
+            });
+        }
+
+
+        	// 🕓 Carrega os horários disponíveis de um dia
+        	function carregarHorarios(diaSelecionado) {
+        	    const horariosContainer = document.getElementById("horariosDisponiveis");
+
+        	    // Corrige a exibição da data evitando erro de fuso
+        	    const [ano, mes, dia] = diaSelecionado.split("-");
+        	    const dataFormatada = `${dia}/${mes}/${ano}`;
+        	    horariosContainer.innerHTML = `<h5 class="fw-bold text-primary">⏰ Horários disponíveis para ${dataFormatada}:</h5>`;
+
+        	    // Filtra horários com base na data exata (sem erro de fuso)
+        	    const horariosDoDia = horarios.filter(h => h.dataHora.startsWith(diaSelecionado));
+
+        	    // Cria container de linhas para os horários
+        	    const row = document.createElement("div");
+        	    row.className = "row mt-3";
+        	    horariosContainer.appendChild(row);
+
+        	    // Cria os cards de horários
+        	    horariosDoDia.forEach(horario => {
+        	        const div = document.createElement("div");
+        	        div.className = "col-md-3";
+        	        div.innerHTML = `
+        	            <div class="card text-center p-2 horario-card" data-id="${horario.id}">
+        	                ${horario.dataHora.split("T")[1].substring(0, 5)}
+        	            </div>
+        	        `;
+        	        row.appendChild(div);
+        	    });
+
+        	    // Seleciona um horário
+        	    document.querySelectorAll(".horario-card").forEach(card => {
+        	        card.onclick = () => {
+        	            document.querySelectorAll(".horario-card").forEach(c => c.classList.remove("selecionado"));
+        	            card.classList.add("selecionado");
+        	            horarioSelecionado = card.getAttribute("data-id");
+        	            document.getElementById("btnAgendar").disabled = false;
+        	        };
+        	    });
+        	}
+
+
+        // ✅ Agendamento
+        document.getElementById("btnAgendar").addEventListener("click", async () => {
+            if (!horarioSelecionado) return alert("Selecione um horário.");
+
+            const disponibilidade = horarios.find(h => h.id == horarioSelecionado);
+
+            const response = await fetch(baseUrl + "/agendamentos", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    paciente,
+                    especialidade: disponibilidade.especialidade,
+                    aluno: disponibilidade.aluno,
+                    dataHora: disponibilidade.dataHora,
+                    confirmado: false,
+                    gratuito: false
+                })
+            });
+
+            if (response.ok) {
+                alert("Consulta agendada com sucesso!");
+                document.getElementById("btnAgendar").disabled = true;
+                window.location.href = "dashboard-paciente.html";
+            } else {
+                alert("Erro ao agendar.");
+            }
+        });
+    </script>
+
+    <style>
+        .btn-outline-secondary {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+    
+        .btn-outline-secondary:hover {
+            background-color: #6c757d;
+            color: white;
+        }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Modal de Profissionais -->
+    <div class="modal fade" id="modalProfissionais" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Profissionais Disponíveis</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Especialidade</th>
+                                    <th>Disponibilidade</th>
+                                    <th>Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaProfissionais">
+                                <!-- Dados serão preenchidos via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

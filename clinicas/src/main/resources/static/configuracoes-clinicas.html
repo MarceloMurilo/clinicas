@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configurações da Clínica</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="config.js"></script>
+</head>
+<body class="bg-light">
+  <div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="text-primary">Configurações da Clínica</h2>
+      <a href="painel-coordenador.html" class="btn btn-outline-secondary">Voltar</a>
+    </div>
+
+    <!-- Abas -->
+    <ul class="nav nav-tabs mb-4" id="tabsConfig" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="salas-tab" data-bs-toggle="tab" data-bs-target="#salas" type="button" role="tab">Salas por Especialidade</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="grade-tab" data-bs-toggle="tab" data-bs-target="#grade" type="button" role="tab">Grade de Horários</button>
+      </li>
+    </ul>
+
+    <div class="tab-content" id="tabsContent">
+      <!-- Aba Salas -->
+      <div class="tab-pane fade show active" id="salas" role="tabpanel">
+        <form id="formSalas" class="card p-4 shadow-sm">
+          <div class="mb-3">
+            <label for="areaClinica" class="form-label">Área Clínica</label>
+            <select id="areaClinica" class="form-select" required>
+              <option value="">Selecione...</option>
+              <option value="Psicologia">Psicologia</option>
+              <option value="Fisioterapia">Fisioterapia</option>
+              <option value="Nutrição">Nutrição</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Selecione as Salas Disponíveis:</label>
+            <div id="opcoesSalas" class="d-flex flex-wrap gap-3">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="Sala 1" id="sala1">
+                <label class="form-check-label" for="sala1">Sala 1</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="Sala 2" id="sala2">
+                <label class="form-check-label" for="sala2">Sala 2</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="Sala 3" id="sala3">
+                <label class="form-check-label" for="sala3">Sala 3</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="Sala 4" id="sala4">
+                <label class="form-check-label" for="sala4">Sala 4</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="Sala 5" id="sala5">
+                <label class="form-check-label" for="sala5">Sala 5</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="Sala 6" id="sala6">
+                <label class="form-check-label" for="sala6">Sala 6</label>
+              </div>
+            </div>
+          </div>
+
+          <p class="fw-bold text-success">Salas Selecionadas: <span id="contadorSalas">0</span></p>
+
+          <button type="submit" class="btn btn-success w-100">Salvar Configuração</button>
+        </form>
+
+        <div id="mensagem" class="mt-3"></div>
+        <hr class="my-5" />
+        <h4 class="mb-3">Salas Configuradas</h4>
+        <ul id="listaSalas" class="list-group"></ul>
+      </div>
+
+      <!-- Aba Grade -->
+      <div class="tab-pane fade" id="grade" role="tabpanel">
+        <form id="formGrade" class="card p-4 shadow-sm">
+          <div class="mb-3">
+            <label for="diasSemana" class="form-label">Dias da Semana com Atendimento:</label>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="MONDAY" id="segunda">
+              <label class="form-check-label" for="segunda">Segunda-feira</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="TUESDAY" id="terca">
+              <label class="form-check-label" for="terca">Terça-feira</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="WEDNESDAY" id="quarta">
+              <label class="form-check-label" for="quarta">Quarta-feira</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="THURSDAY" id="quinta">
+              <label class="form-check-label" for="quinta">Quinta-feira</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="FRIDAY" id="sexta">
+              <label class="form-check-label" for="sexta">Sexta-feira</label>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="horarioInicio" class="form-label">Horário de Início</label>
+            <input type="time" id="horarioInicio" class="form-control" required>
+          </div>
+		
+          <div class="mb-3">
+            <label for="horarioFim" class="form-label">Horário de Término</label>
+            <input type="time" id="horarioFim" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="intervalo" class="form-label">Intervalo entre atendimentos (em minutos)</label>
+            <input type="number" id="intervalo" class="form-control" min="5" step="5" required>
+          </div>
+          
+          <div class="mb-3">
+  <label for="almocoInicio" class="form-label">Início do intervalo de almoço</label>
+  <input type="time" id="almocoInicio" class="form-control" required>
+</div>
+
+<div class="mb-3">
+  <label for="almocoFim" class="form-label">Fim do intervalo de almoço</label>
+  <input type="time" id="almocoFim" class="form-control" required>
+</div>
+          
+
+          <button type="submit" class="btn btn-success w-100">Salvar Grade</button>
+        </form>
+
+        <div id="mensagemGrade" class="mt-3"></div>
+
+        <hr class="my-4">
+        <h5>Grade Semanal Configurada</h5>
+        <ul id="listaGrade" class="list-group"></ul>
+      </div>
+    </div>
+  </div>
+	<script>
+  async function carregarSalas() {
+    const resp = await fetch(baseUrl + "/salas");
+    const salas = await resp.json();
+    const lista = document.getElementById("listaSalas");
+    lista.innerHTML = "";
+    salas.forEach(s => {
+      const li = document.createElement("li");
+      li.className = "list-group-item d-flex justify-content-between align-items-center";
+      li.innerHTML = `${s.areaClinica} - ${s.quantidade} sala(s) (${s.salas.join(', ')})`;
+      lista.appendChild(li);
+    });
+  }
+
+  function atualizarContador() {
+    const selecionadas = document.querySelectorAll("#opcoesSalas input[type='checkbox']:checked");
+    document.getElementById("contadorSalas").textContent = selecionadas.length;
+  }
+
+  document.querySelectorAll("#opcoesSalas input[type='checkbox']").forEach(cb => {
+    cb.addEventListener("change", atualizarContador);
+  });
+
+  document.getElementById("formSalas").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const areaClinica = document.getElementById("areaClinica").value;
+    const selecionadas = Array.from(document.querySelectorAll("#opcoesSalas input[type='checkbox']:checked")).map(cb => cb.value);
+    const quantidade = selecionadas.length;
+
+    const resp = await fetch(baseUrl + "/salas", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ areaClinica, quantidade, salas: selecionadas })
+    });
+
+    const msg = document.getElementById("mensagem");
+    if (resp.ok) {
+      msg.innerHTML = `<div class="alert alert-success">Salas configuradas com sucesso!</div>`;
+      carregarSalas();
+    } else {
+      msg.innerHTML = `<div class="alert alert-danger">Erro ao salvar configuração.</div>`;
+    }
+  });
+
+  carregarSalas();
+</script>
+	
+ <script>
+  document.getElementById("formGrade").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const diasSelecionados = Array.from(document.querySelectorAll("input[type='checkbox']:checked"))
+      .map(cb => cb.value);
+
+    const horaInicio = document.getElementById("horarioInicio").value;
+    const horaFim = document.getElementById("horarioFim").value;
+    const intervalo = document.getElementById("intervalo").value;
+    const almocoInicio = document.getElementById("almocoInicio").value;
+    const almocoFim = document.getElementById("almocoFim").value;
+
+    const dados = diasSelecionados.map(dia => ({
+      diaSemana: dia,
+      horaInicio,
+      horaFim,
+      intervaloMinutos: parseInt(intervalo),
+      intervaloAlmocoInicio: almocoInicio,
+      intervaloAlmocoFim: almocoFim
+    }));
+
+    const resp = await fetch(baseUrl + "/grade", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(dados)
+    });
+
+    const msg = document.getElementById("mensagemGrade");
+    if (resp.ok) {
+      msg.innerHTML = `<div class="alert alert-success">Grade salva com sucesso!</div>`;
+      carregarGrade();
+    } else {
+      msg.innerHTML = `<div class="alert alert-danger">Erro ao salvar a grade.</div>`;
+    }
+  });
+
+  const diasSemanaTraduzidos = {
+		  MONDAY: "Segunda-feira",
+		  TUESDAY: "Terça-feira",
+		  WEDNESDAY: "Quarta-feira",
+		  THURSDAY: "Quinta-feira",
+		  FRIDAY: "Sexta-feira",
+		  SATURDAY: "Sábado",
+		  SUNDAY: "Domingo"
+		};
+
+		async function carregarGrade() {
+		  const resp = await fetch(baseUrl + "/grade");
+		  const lista = await resp.json();
+
+		  const ul = document.getElementById("listaGrade");
+		  ul.innerHTML = "";
+		  lista.forEach(g => {
+		    const dia = diasSemanaTraduzidos[g.diaSemana] || g.diaSemana;
+		    const li = document.createElement("li");
+		    li.className = "list-group-item";
+		    li.textContent = `${dia}: ${g.horaInicio} - ${g.horaFim} (intervalo ${g.intervaloMinutos} min, almoço: ${g.intervaloAlmocoInicio} às ${g.intervaloAlmocoFim})`;
+		    ul.appendChild(li);
+		  });
+		}
+
+
+  // Carregar grade ao abrir a aba
+  document.addEventListener('DOMContentLoaded', () => {
+    const tabGrade = document.querySelector('#grade-tab');
+    tabGrade.addEventListener('shown.bs.tab', carregarGrade);
+    if (document.querySelector('#grade').classList.contains('active')) {
+      carregarGrade();
+    }
+  });
+</script>
+ 
+</body>
+</html>

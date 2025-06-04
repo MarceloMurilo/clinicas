@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Painel do Aluno</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="config.js"></script>
+</head>
+<body class="bg-light">
+  <div class="container py-4">
+    <!-- Título + Sair -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="text-primary"><i class="bi bi-person-circle"></i> Painel do Aluno</h2>
+      <a href="login.html" class="btn btn-outline-secondary">Sair</a>
+    </div>
+
+    <!-- Menu de Ações -->
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+      <div class="col">
+        <a href="agenda-aluno.html" class="text-decoration-none text-dark">
+          <div class="card menu-card shadow-sm h-100">
+            <div class="card-body text-center">
+              <h1><i class="bi bi-calendar-week"></i></h1>
+              <h5 class="card-title">Minhas Consultas</h5>
+              <p class="card-text">Veja seus agendamentos futuros e passados.</p>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <div class="col">
+        <a href="historico-aluno.html" class="text-decoration-none text-dark">
+          <div class="card menu-card shadow-sm h-100">
+            <div class="card-body text-center">
+              <h1><i class="bi bi-clock-history"></i></h1>
+              <h5 class="card-title">Histórico</h5>
+              <p class="card-text">Veja quais consultas você já participou.</p>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <div class="col">
+        <a href="chat-recepcao.html" class="text-decoration-none text-dark">
+          <div class="card menu-card shadow-sm h-100">
+            <div class="card-body text-center">
+              <h1><i class="bi bi-chat-dots"></i></h1>
+              <h5 class="card-title">Chat com a Recepção</h5>
+              <p class="card-text">Converse diretamente com a equipe da recepção.</p>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Você pode adicionar uma seção para exibir agendamentos ativos abaixo se quiser -->
+  </div>
+
+  <script>
+    // Se quiser incluir carregamento automático no painel
+    const alunoId = 1; // Em produção, virá da sessão ou JWT
+
+    async function carregarAgendamentos() {
+      const resp = await fetch(baseUrl +`/agendamentos/aluno/${alunoId}`);
+      const dados = await resp.json();
+      const lista = document.getElementById("listaAgendamentos");
+      lista.innerHTML = "";
+
+      dados.forEach(a => {
+        const card = document.createElement("div");
+        card.className = "col-md-4 mb-3";
+        card.innerHTML = `
+          <div class="card shadow-sm p-3">
+            <h5>${a.profissional.nome}</h5>
+            <p><strong>Hora:</strong> ${a.horario}</p>
+            <p><strong>Especialidade:</strong> ${a.especialidade}</p>
+          </div>
+        `;
+        lista.appendChild(card);
+      });
+    }
+
+    // Opcional, se quiser exibir agendamentos na tela principal
+    // carregarAgendamentos();
+  </script>
+</body>
+</html>
